@@ -1,0 +1,8 @@
+streamlit
+pandas
+numpy
+joblib
+streamlit-option-menu
+requests
+streamlit-lottie
+scikit-learn
