@@ -5,10 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score, roc_auc_score, classification_report
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.callbacks import EarlyStopping
+from sklearn.neural_network import MLPClassifier
 
 # Load data
 df = pd.read_excel("final_panel_data.xlsx")
@@ -29,22 +26,14 @@ rf_pred = rf_model.predict(X_test)
 print("Random Forest Accuracy:", accuracy_score(y_test, rf_pred))
 
 # 2. ANN Model
-ann_model = Sequential([
-    Dense(64, activation='relu', input_shape=(X_train.shape[1],)),
-    Dropout(0.3),
-    Dense(32, activation='relu'),
-    Dropout(0.2),
-    Dense(1, activation='sigmoid')
-])
-
-ann_model.compile(optimizer=Adam(0.001), loss='binary_crossentropy', metrics=['accuracy'])
-ann_model.fit(X_train, y_train, epochs=50, batch_size=32, verbose=1)
-ann_pred = (ann_model.predict(X_test) > 0.5).astype(int)
+ann_model = MLPClassifier(hidden_layer_sizes=(64, 32), activation='relu', max_iter=50, learning_rate_init=0.001, random_state=0)
+ann_model.fit(X_train, y_train)
+ann_pred = ann_model.predict(X_test)
 print("ANN Accuracy:", accuracy_score(y_test, ann_pred))
 
 # 3. Hybrid Model (Average Probabilities)
 rf_proba = rf_model.predict_proba(X_test)[:, 1]
-ann_proba = ann_model.predict(X_test).flatten()
+ann_proba = ann_model.predict_proba(X_test)[:, 1]
 hybrid_proba = (rf_proba + ann_proba) / 2
 hybrid_pred = (hybrid_proba > 0.5).astype(int)
 
@@ -61,17 +50,16 @@ joblib.dump(rf_model, "rf_model.pkl")
 joblib.dump(scaler, "scaler.pkl")
 
 # Save ANN model
-ann_model.save("ann_model.h5")
+joblib.dump(ann_model, "ann_model.pkl")
 
 import streamlit as st
 import numpy as np
 import joblib
-from tensorflow.keras.models import load_model
 
 # Load trained models and scaler
 rf_model = joblib.load("rf_model.pkl")
 scaler = joblib.load("scaler.pkl")
-ann_model = load_model("ann_model.h5")
+ann_model = joblib.load("ann_model.pkl")
 
 st.set_page_config(page_title="Hybrid Model Prediction", layout="centered")
 
@@ -93,7 +81,7 @@ if predict_button_clicked:
     input_scaled = scaler.transform(input_data)
 
     rf_proba = rf_model.predict_proba(input_scaled)[:, 1]
-    ann_proba = ann_model.predict(input_scaled).flatten()
+    ann_proba = ann_model.predict_proba(input_scaled)[:, 1]
     hybrid_proba = (rf_proba + ann_proba) / 2
     hybrid_pred = (hybrid_proba > 0.5).astype(int)
 

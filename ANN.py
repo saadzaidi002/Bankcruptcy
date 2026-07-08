@@ -1,4 +1,3 @@
-import tensorflow as tf
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -7,9 +6,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score
 
 # Deep learning libraries
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.callbacks import EarlyStopping
+from sklearn.neural_network import MLPClassifier
 
 # Load dataset
 df = pd.read_excel('final_panel_data.xlsx')
@@ -28,33 +25,17 @@ X_train, X_temp, y_train, y_temp = train_test_split(X_scaled, y, test_size=0.3, 
 X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=2/3, random_state=0)
 
 # Build the model
-model = Sequential()
-model.add(Dense(16, input_dim=X.shape[1], activation='relu'))
-model.add(Dropout(0.3))
-model.add(Dense(8, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(1, activation='sigmoid'))  # Binary output
-
-# Compile
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-
-# Early stopping
-early_stop = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
+model = MLPClassifier(hidden_layer_sizes=(16, 8), activation='relu', max_iter=150, early_stopping=True, random_state=0)
 
 # Train
-history = model.fit(X_train, y_train,
-                    validation_data=(X_val, y_val),
-                    epochs=150,
-                    batch_size=32,
-                    callbacks=[early_stop],
-                    verbose=1)
+model.fit(X_train, y_train)
 
 # Evaluate on TEST set (scaled)
-test_loss, test_accuracy = model.evaluate(X_test, y_test)
-print(f'\n✅ Test Accuracy: {test_accuracy:.4f}, Test Loss: {test_loss:.4f}')
+test_accuracy = model.score(X_test, y_test)
+print(f'\nTest Accuracy: {test_accuracy:.4f}')
 
 # Optional: More detailed metrics
-y_pred_probs = model.predict(X_test).ravel()
+y_pred_probs = model.predict_proba(X_test)[:, 1]
 y_pred = (y_pred_probs > 0.5).astype(int)
 
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
@@ -95,9 +76,9 @@ if predict_button_clicked:
     input_data = np.array([[return_on_asset, asset_turnover, real_interest_rate, gdp_growth, electricity_prices]])
     
     input_scaled = scaler.transform(input_data)
-    prediction = model.predict(input_scaled)
-    predicted_class = (prediction > 0.5).astype(int)
-    confidence = round(prediction[0][0] * 100, 2)
+    prediction = model.predict_proba(input_scaled)[:, 1]
+    predicted_class = [int(prediction[0] > 0.5)]
+    confidence = round(prediction[0] * 100, 2)
 
     st.markdown("---")
     if predicted_class[0] == 1:
