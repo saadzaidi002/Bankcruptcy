@@ -36,8 +36,8 @@ st.markdown("""
     }
     .stButton>button {
         width: 100%;
-        background-color: #174F77;
-        color: white;
+        background-color: #4D8CB5;
+        color: #D9E6F2;
         border-radius: 8px;
         padding: 0.5rem 1rem;
         font-weight: bold;
@@ -45,17 +45,17 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stButton>button:hover {
-        background-color: #4D8CB5;
-        color: white;
+        background-color: #94BED8;
+        color: #2A1A31;
         transform: translateY(-3px);
         box-shadow: 0 8px 15px rgba(0,0,0,0.2);
     }
     .highlight {
-        background-color: #94BED8;
+        background-color: #174F77;
         padding: 20px;
         border-radius: 10px;
         margin-bottom: 20px;
-        color: #2A1A31;
+        color: #D9E6F2;
         transition: all 0.3s ease-in-out;
     }
     .highlight:hover {
@@ -63,7 +63,7 @@ st.markdown("""
         box-shadow: 0 10px 20px rgba(0,0,0,0.15);
     }
     div[data-testid="stMetricValue"] {
-        color: #174F77;
+        color: #94BED8;
         transition: all 0.3s ease-in-out;
     }
     div[data-testid="stMetricValue"]:hover {
