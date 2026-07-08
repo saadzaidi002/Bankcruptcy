@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "https://smsaad001-bankruptcy.hf.space/$1"
+      "destination": "https://saadyzay-bank.hf.space/$1"
     }
   ]
 }
